@@ -1,0 +1,20 @@
+name: sam3_env
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pytorch>=2.4.0
+  - torchvision
+  - pytorch-cuda=12.1
+  - numpy
+  - pillow
+  - matplotlib
+  - requests
+  - pip:
+    - transformers>=4.45.0
+    - opencv-python
+    - accelerate
