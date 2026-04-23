@@ -14,12 +14,15 @@ import numpy as np
 from utils.graphics_utils import fov2focal
 from PIL import Image
 import cv2
+import os
 
 WARNED = False
 
 def loadCam(args, id, cam_info, resolution_scale, is_nerf_synthetic, is_test_dataset):
     image = Image.open(cam_info.image_path)
-    mask = Image.open(cam_info.mask_path)
+    mask = None
+    if os.path.exists(cam_info.mask_path):
+        mask = Image.open(cam_info.mask_path).convert("L")
 
     if cam_info.depth_path != "":
         try:

@@ -37,7 +37,7 @@ class CameraInfo(NamedTuple):
     width: int
     height: int
     is_test: bool
-    mask_folder: str
+    mask_path: str
 
 class SceneInfo(NamedTuple):
     point_cloud: BasicPointCloud
@@ -108,12 +108,13 @@ def readColmapCameras(cam_extrinsics, cam_intrinsics, depths_params, images_fold
                 print("\n", key, "not found in depths_params")
 
         image_path = os.path.join(images_folder, extr.name)
+        mask_path = os.path.join(mask_folder, extr.name)
         image_name = extr.name
         depth_path = os.path.join(depths_folder, f"{extr.name[:-n_remove]}.png") if depths_folder != "" else ""
-
+        
         cam_info = CameraInfo(uid=uid, R=R, T=T, FovY=FovY, FovX=FovX, depth_params=depth_params,
                               image_path=image_path, image_name=image_name, depth_path=depth_path,
-                              width=width, height=height, is_test=image_name in test_cam_names_list, mask_folder=mask_folder)
+                              width=width, height=height, is_test=image_name in test_cam_names_list, mask_path=mask_path)
         cam_infos.append(cam_info)
 
     sys.stdout.write('\n')
@@ -193,7 +194,7 @@ def readColmapSceneInfo(path, images, depths, eval, train_test_exp, llffhold=8):
         test_cam_names_list = []
 
     reading_dir = "images" if images == None else images
-    mask_reading_dir = "mask"
+    mask_reading_dir = "masks"
     cam_infos_unsorted = readColmapCameras(
         cam_extrinsics=cam_extrinsics, cam_intrinsics=cam_intrinsics, depths_params=depths_params,
         images_folder=os.path.join(path, reading_dir), 
@@ -254,6 +255,8 @@ def readCamerasFromTransforms(path, transformsfile, depths_folder, white_backgro
             image_name = Path(cam_name).stem
             image = Image.open(image_path)
 
+            mask_path = os.path.join(path, cam_name)
+
             im_data = np.array(image.convert("RGBA"))
 
             bg = np.array([1,1,1]) if white_background else np.array([0, 0, 0])
@@ -268,8 +271,9 @@ def readCamerasFromTransforms(path, transformsfile, depths_folder, white_backgro
 
             depth_path = os.path.join(depths_folder, f"{image_name}.png") if depths_folder != "" else ""
 
+            mask_folder = "masks"
             cam_infos.append(CameraInfo(uid=idx, R=R, T=T, FovY=FovY, FovX=FovX,
-                            image_path=image_path, image_name=image_name,
+                            image_path=image_path, image_name=image_name, mask_path=os.path.join(path, mask_folder),
                             width=image.size[0], height=image.size[1], depth_path=depth_path, depth_params=None, is_test=is_test))
             
     return cam_infos
